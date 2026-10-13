@@ -3,6 +3,9 @@ package plat.lab1.myapplication.navigation
 import kotlinx.serialization.Serializable
 
 @Serializable
+data object SessionDestination
+
+@Serializable
 data object LoginDestination
 
 @Serializable

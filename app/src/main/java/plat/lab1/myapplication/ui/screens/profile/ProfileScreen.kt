@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ProfileScreen(
+    userName: String,
     onLogoutClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -32,25 +33,15 @@ fun ProfileScreen(
             modifier = Modifier.size(120.dp)
         )
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Kenett Alexander Ortega Cerón"
-        )
+        Text(text = userName)
 
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "25777"
-        )
+        Text(text = "25777")
 
-        Spacer(
-            modifier = Modifier.height(24.dp)
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = onLogoutClick

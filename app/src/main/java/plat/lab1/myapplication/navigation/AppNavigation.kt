@@ -1,9 +1,18 @@
 package plat.lab1.myapplication.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -14,8 +23,9 @@ import plat.lab1.myapplication.ui.components.CharacterDetailsStateScreen
 import plat.lab1.myapplication.ui.components.LocationsStateScreen
 import plat.lab1.myapplication.ui.components.LocationDetailsStateScreen
 import plat.lab1.myapplication.ui.screens.login.LoginScreen
-import plat.lab1.myapplication.ui.screens.main.MainScreen
+import plat.lab1.myapplication.ui.screens.main.BottomNavigationBar
 import plat.lab1.myapplication.ui.screens.profile.ProfileScreen
+import plat.lab1.myapplication.ui.viewmodel.SessionViewModel
 
 @Composable
 fun AppNavigation(
@@ -23,118 +33,171 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
 
-    NavHost(
-        navController = navController,
-        startDestination = LoginDestination,
-        modifier = modifier
-    ) {
-        composable<LoginDestination> {
-            LoginScreen(
-                onStartClick = {
-                    navController.navigate(MainDestination) {
-                        popUpTo<LoginDestination> {
-                            inclusive = true
+    val sessionViewModel: SessionViewModel = viewModel()
+    val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
+
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStackEntry?.destination
+
+    val isMainScreen = currentDestination?.hierarchy?.any {
+        it.route == MainDestination::class.qualifiedName
+    } == true
+
+    val selectedItem = when {
+        currentDestination?.hierarchy?.any {
+            it.route == LocationsGraph::class.qualifiedName
+        } == true -> 1
+
+        currentDestination?.route ==
+                ProfileDestination::class.qualifiedName -> 2
+
+        else -> 0
+    }
+
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            if (isMainScreen) {
+                BottomNavigationBar(
+                    selectedItem = selectedItem,
+
+                    onCharactersClick = {
+                        if (selectedItem != 0) {
+                            navController.popBackStack(
+                                route = CharactersDestination,
+                                inclusive = false
+                            )
+                        }
+                    },
+
+                    onLocationsClick = {
+                        if (selectedItem != 1) {
+                            navController.navigate(LocationsGraph) {
+                                popUpTo(CharactersDestination) {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                            }
+                        }
+                    },
+
+                    onProfileClick = {
+                        if (selectedItem != 2) {
+                            navController.navigate(ProfileDestination) {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    ) { paddingValues ->
+
+        NavHost(
+            navController = navController,
+            startDestination = SessionDestination,
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            composable<SessionDestination> {
+                LaunchedEffect(sessionState.isLoading) {
+                    if (!sessionState.isLoading) {
+                        if (sessionState.userName.isNullOrBlank()) {
+                            navController.navigate(LoginDestination) {
+                                popUpTo<SessionDestination> {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+                        } else {
+                            navController.navigate(MainDestination) {
+                                popUpTo<SessionDestination> {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
                         }
                     }
                 }
-            )
-        }
 
-        composable<MainDestination> {
-            val mainNavController = rememberNavController()
-
-            val backStackEntry by
-            mainNavController.currentBackStackEntryAsState()
-
-            val currentDestination = backStackEntry?.destination
-
-            val selectedItem = when {
-                currentDestination?.route?.contains("Location") == true -> 1
-                currentDestination?.route?.contains("Profile") == true -> 2
-                else -> 0
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
 
-            MainScreen(
-                selectedItem = selectedItem,
-
-                onCharactersClick = {
-                    mainNavController.navigate(CharactersGraph) {
-                        launchSingleTop = true
+            composable<LoginDestination> {
+                LoginScreen(
+                    onStartClick = { name ->
+                        sessionViewModel.login(name) {
+                            navController.navigate(MainDestination) {
+                                popUpTo<LoginDestination> {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+                        }
                     }
-                },
+                )
+            }
 
-                onLocationsClick = {
-                    mainNavController.navigate(LocationsGraph) {
-                        launchSingleTop = true
+            navigation<MainDestination>(
+                startDestination = CharactersGraph
+            ) {
+                navigation<CharactersGraph>(
+                    startDestination = CharactersDestination
+                ) {
+                    composable<CharactersDestination> {
+                        CharactersStateScreen(
+                            onCharacterClick = { characterId ->
+                                navController.navigate(
+                                    CharacterDetailsDestination(
+                                        id = characterId
+                                    )
+                                )
+                            }
+                        )
                     }
-                },
 
-                onProfileClick = {
-                    mainNavController.navigate(ProfileDestination) {
-                        launchSingleTop = true
+                    composable<CharacterDetailsDestination> {
+                        CharacterDetailsStateScreen(
+                            onBackClick = {
+                                navController.navigateUp()
+                            }
+                        )
                     }
                 }
-            ) { paddingValues ->
 
-                NavHost(
-                    navController = mainNavController,
-                    startDestination = CharactersGraph,
-                    modifier = Modifier.padding(paddingValues)
+                navigation<LocationsGraph>(
+                    startDestination = LocationsDestination
                 ) {
-
-                    navigation<CharactersGraph>(
-                        startDestination = CharactersDestination
-                    ) {
-
-                        composable<CharactersDestination> {
-                            CharactersStateScreen(
-                                onCharacterClick = { characterId ->
-                                    mainNavController.navigate(
-                                        CharacterDetailsDestination(
-                                            id = characterId
-                                        )
+                    composable<LocationsDestination> {
+                        LocationsStateScreen(
+                            onLocationClick = { locationId ->
+                                navController.navigate(
+                                    LocationDetailsDestination(
+                                        id = locationId
                                     )
-                                }
-                            )
-                        }
-
-                        composable<CharacterDetailsDestination> {
-                            CharacterDetailsStateScreen(
-                                onBackClick = {
-                                    mainNavController.navigateUp()
-                                }
-                            )
-                        }
+                                )
+                            }
+                        )
                     }
 
-                    navigation<LocationsGraph>(
-                        startDestination = LocationsDestination
-                    ) {
-
-                        composable<LocationsDestination> {
-                            LocationsStateScreen(
-                                onLocationClick = { locationId ->
-                                    mainNavController.navigate(
-                                        LocationDetailsDestination(
-                                            id = locationId
-                                        )
-                                    )
-                                }
-                            )
-                        }
-
-                        composable<LocationDetailsDestination> {
-                            LocationDetailsStateScreen(
-                                onBackClick = {
-                                    mainNavController.navigateUp()
-                                }
-                            )
-                        }
+                    composable<LocationDetailsDestination> {
+                        LocationDetailsStateScreen(
+                            onBackClick = {
+                                navController.navigateUp()
+                            }
+                        )
                     }
+                }
 
-                    composable<ProfileDestination> {
-                        ProfileScreen(
-                            onLogoutClick = {
+                composable<ProfileDestination> {
+                    ProfileScreen(
+                        userName = sessionState.userName.orEmpty(),
+                        onLogoutClick = {
+                            sessionViewModel.logout {
                                 navController.navigate(LoginDestination) {
                                     popUpTo<MainDestination> {
                                         inclusive = true
@@ -142,8 +205,8 @@ fun AppNavigation(
                                     launchSingleTop = true
                                 }
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
