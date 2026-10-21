@@ -9,6 +9,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.automirrored.filled.List
 
 @Composable
 fun BottomNavigationBar(
@@ -23,7 +24,7 @@ fun BottomNavigationBar(
             onClick = onCharactersClick,
             icon = {
                 Icon(
-                    imageVector = Icons.Default.List,
+                    imageVector = Icons.AutoMirrored.Filled.List,
                     contentDescription = "Characters"
                 )
             },

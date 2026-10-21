@@ -1,24 +1,27 @@
 package plat.lab1.myapplication.ui.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import plat.lab1.myapplication.data.Location
-import plat.lab1.myapplication.data.LocationDb
+import plat.lab1.myapplication.data.room.RoomRepository
 import plat.lab1.myapplication.navigation.LocationDetailsDestination
 import plat.lab1.myapplication.ui.state.ScreenState
 
 class LocationDetailsViewModel(
+    application: Application,
     savedStateHandle: SavedStateHandle
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
-    private val db = LocationDb()
+    private val repository = RoomRepository(application)
 
     private val id =
         savedStateHandle.toRoute<LocationDetailsDestination>().id
@@ -36,17 +39,21 @@ class LocationDetailsViewModel(
 
     fun loadLocation() {
         loadingJob?.cancel()
-
         _uiState.value = ScreenState(isLoading = true)
 
         loadingJob = viewModelScope.launch {
-            delay(2000)
-
             try {
-                _uiState.value = ScreenState(
-                    isLoading = false,
-                    data = db.getLocationById(id)
-                )
+                delay(2000)
+
+                repository.getLocation(id).collect { location ->
+                    _uiState.value = ScreenState(
+                        isLoading = false,
+                        data = location,
+                        hasError = location == null
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.value = ScreenState(
                     isLoading = false,

@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -38,20 +40,32 @@ import plat.lab1.myapplication.data.Character
 fun CharacterDetailsScreen(
     character: Character,
     onBackClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = "Characters details")
-                },
+                title = { Text("Characters details") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Regresar"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onFavoriteClick) {
+                        Icon(
+                            imageVector = if (character.isFavorite) {
+                                Icons.Filled.Star
+                            } else {
+                                Icons.Outlined.StarBorder
+                            },
+                            contentDescription = "Favorito",
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
@@ -73,71 +87,52 @@ fun CharacterDetailsScreen(
         ) {
             AsyncImage(
                 model = character.image,
-                contentDescription = "Imagen de ${character.name}",
+                contentDescription = character.name,
                 modifier = Modifier
                     .size(260.dp)
                     .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
             Text(
                 text = character.name,
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
-            CharacterInformation(
-                label = "Especie",
-                value = character.species
-            )
-
-            CharacterInformation(
-                label = "Estado",
-                value = character.status
-            )
-
-            CharacterInformation(
-                label = "Género",
-                value = character.gender
+            DetailRow("ID", character.id.toString())
+            DetailRow("Especie", character.species)
+            DetailRow("Estado", character.status)
+            DetailRow("Género", character.gender)
+            DetailRow(
+                "Favorito",
+                if (character.isFavorite) "Sí" else "No"
             )
         }
     }
 }
 
 @Composable
-private fun CharacterInformation(
+private fun DetailRow(
     label: String,
-    value: String,
-    modifier: Modifier = Modifier
+    value: String
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant
+        Text(
+            text = label,
+            fontWeight = FontWeight.Bold
         )
+        Text(text = value)
     }
+
+    HorizontalDivider()
 }

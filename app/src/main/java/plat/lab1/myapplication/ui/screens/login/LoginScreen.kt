@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +27,8 @@ import plat.lab1.myapplication.R
 @Composable
 fun LoginScreen(
     onStartClick: (String) -> Unit,
+    isSyncing: Boolean = false,
+    hasError: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var name by rememberSaveable {
@@ -53,19 +56,28 @@ fun LoginScreen(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = {
-                Text("Nombre")
-            },
-            singleLine = true
+            label = { Text("Nombre") },
+            singleLine = true,
+            enabled = !isSyncing
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        if (isSyncing) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Sincronizando datos...")
+        }
+
+        if (hasError) {
+            Text("Error al sincronizar. Intenta de nuevo.")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
-            onClick = {
-                onStartClick(name.trim())
-            },
-            enabled = name.isNotBlank(),
+            onClick = { onStartClick(name.trim()) },
+            enabled = name.isNotBlank() && !isSyncing,
             modifier = Modifier.width(220.dp)
         ) {
             Text("Iniciar sesión")

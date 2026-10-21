@@ -1,19 +1,23 @@
 package plat.lab1.myapplication.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import plat.lab1.myapplication.data.Location
-import plat.lab1.myapplication.data.LocationDb
+import plat.lab1.myapplication.data.room.RoomRepository
 import plat.lab1.myapplication.ui.state.ScreenState
 
-class LocationsViewModel : ViewModel() {
+class LocationsViewModel(
+    application: Application
+) : AndroidViewModel(application) {
 
-    private val db = LocationDb()
+    private val repository = RoomRepository(application)
 
     private val _uiState =
         MutableStateFlow(ScreenState<List<Location>>())
@@ -28,17 +32,20 @@ class LocationsViewModel : ViewModel() {
 
     fun loadLocations() {
         loadingJob?.cancel()
-
         _uiState.value = ScreenState(isLoading = true)
 
         loadingJob = viewModelScope.launch {
-            delay(4000)
-
             try {
-                _uiState.value = ScreenState(
-                    isLoading = false,
-                    data = db.getAllLocations()
-                )
+                delay(4000)
+
+                repository.getLocations().collect { locations ->
+                    _uiState.value = ScreenState(
+                        isLoading = false,
+                        data = locations
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.value = ScreenState(
                     isLoading = false,

@@ -129,6 +129,8 @@ fun AppNavigation(
 
             composable<LoginDestination> {
                 LoginScreen(
+                    isSyncing = sessionState.isSyncing,
+                    hasError = sessionState.hasError,
                     onStartClick = { name ->
                         sessionViewModel.login(name) {
                             navController.navigate(MainDestination) {
@@ -197,12 +199,14 @@ fun AppNavigation(
                     ProfileScreen(
                         userName = sessionState.userName.orEmpty(),
                         onLogoutClick = {
-                            sessionViewModel.logout {
-                                navController.navigate(LoginDestination) {
-                                    popUpTo<MainDestination> {
-                                        inclusive = true
+                            if (!sessionState.isSyncing) {
+                                sessionViewModel.logout {
+                                    navController.navigate(LoginDestination) {
+                                        popUpTo<MainDestination> {
+                                            inclusive = true
+                                        }
+                                        launchSingleTop = true
                                     }
-                                    launchSingleTop = true
                                 }
                             }
                         }
