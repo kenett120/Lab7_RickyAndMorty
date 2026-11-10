@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import plat.lab1.myapplication.data.room.entity.LocationEntity
 import kotlinx.coroutines.flow.Flow
+import plat.lab1.myapplication.data.room.entity.LocationEntity
 
 @Dao
 interface LocationDao {
@@ -18,6 +18,9 @@ interface LocationDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(locations: List<LocationEntity>)
+
+    @Query("UPDATE locations SET isFavorite = :favorite WHERE id = :id")
+    suspend fun updateFavorite(id: Int, favorite: Boolean)
 
     @Query("SELECT COUNT(*) FROM locations")
     suspend fun countLocations(): Int

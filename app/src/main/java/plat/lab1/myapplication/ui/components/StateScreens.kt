@@ -15,48 +15,69 @@ import plat.lab1.myapplication.ui.viewmodel.LocationDetailsViewModel
 @Composable
 fun CharactersStateScreen(
     onCharacterClick: (Int) -> Unit,
+    onCreateClick: () -> Unit,
     viewModel: CharactersViewModel = viewModel()
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
     when {
-        state.hasError -> ErrorScreen(
-            onRetryClick = viewModel::loadCharacters
-        )
+        state.hasError -> {
+            ErrorScreen(
+                onRetryClick = viewModel::loadCharacters
+            )
+        }
 
-        state.isLoading -> LoadingScreen(
-            onClick = viewModel::showError
-        )
+        state.isLoading -> {
+            LoadingScreen(
+                onClick = viewModel::showError
+            )
+        }
 
-        state.data != null -> CharactersScreen(
-            characters = state.data,
-            onCharacterClick = onCharacterClick,
-            onFavoriteClick = viewModel::toggleFavorite
-        )
+        state.data != null -> {
+            CharactersScreen(
+                characters = state.data,
+                onCharacterClick = onCharacterClick,
+                onFavoriteClick = viewModel::toggleFavorite,
+                onCreateClick = onCreateClick
+            )
+        }
     }
 }
 
 @Composable
 fun CharacterDetailsStateScreen(
     onBackClick: () -> Unit,
+    onEditClick: (Int) -> Unit,
     viewModel: CharacterDetailsViewModel = viewModel()
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
     when {
-        state.hasError -> ErrorScreen(
-            onRetryClick = viewModel::loadCharacter
-        )
+        state.hasError -> {
+            ErrorScreen(
+                onRetryClick = viewModel::loadCharacter
+            )
+        }
 
-        state.isLoading -> LoadingScreen(
-            onClick = viewModel::showError
-        )
+        state.isLoading -> {
+            LoadingScreen(
+                onClick = viewModel::showError
+            )
+        }
 
-        state.data != null -> CharacterDetailsScreen(
-            character = state.data,
-            onBackClick = onBackClick,
-            onFavoriteClick = viewModel::toggleFavorite
-        )
+        state.data != null -> {
+            CharacterDetailsScreen(
+                character = state.data,
+                onBackClick = onBackClick,
+                onFavoriteClick = viewModel::toggleFavorite,
+                onEditClick = {
+                    onEditClick(state.data.id)
+                },
+                onDeleteClick = {
+                    viewModel.deleteCharacter(onBackClick)
+                }
+            )
+        }
     }
 }
 
@@ -78,7 +99,8 @@ fun LocationsStateScreen(
 
         state.data != null -> LocationsScreen(
             locations = state.data,
-            onLocationClick = onLocationClick
+            onLocationClick = onLocationClick,
+            onFavoriteClick = viewModel::toggleFavorite
         )
     }
 }
@@ -91,17 +113,24 @@ fun LocationDetailsStateScreen(
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
     when {
-        state.hasError -> ErrorScreen(
-            onRetryClick = viewModel::loadLocation
-        )
+        state.hasError -> {
+            ErrorScreen(
+                onRetryClick = viewModel::loadLocation
+            )
+        }
 
-        state.isLoading -> LoadingScreen(
-            onClick = viewModel::showError
-        )
+        state.isLoading -> {
+            LoadingScreen(
+                onClick = viewModel::showError
+            )
+        }
 
-        state.data != null -> LocationDetailsScreen(
-            location = state.data,
-            onBackClick = onBackClick
-        )
+        state.data != null -> {
+            LocationDetailsScreen(
+                location = state.data,
+                onBackClick = onBackClick,
+                onFavoriteClick = viewModel::toggleFavorite
+            )
+        }
     }
 }

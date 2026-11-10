@@ -20,6 +20,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import plat.lab1.myapplication.ui.components.CharactersStateScreen
 import plat.lab1.myapplication.ui.components.CharacterDetailsStateScreen
+import plat.lab1.myapplication.ui.components.CharacterFormStateScreen
 import plat.lab1.myapplication.ui.components.LocationsStateScreen
 import plat.lab1.myapplication.ui.components.LocationDetailsStateScreen
 import plat.lab1.myapplication.ui.screens.login.LoginScreen
@@ -158,6 +159,11 @@ fun AppNavigation(
                                         id = characterId
                                     )
                                 )
+                            },
+                            onCreateClick = {
+                                navController.navigate(
+                                    EditCharacterDestination(id = 0)
+                                )
                             }
                         )
                     }
@@ -165,6 +171,21 @@ fun AppNavigation(
                     composable<CharacterDetailsDestination> {
                         CharacterDetailsStateScreen(
                             onBackClick = {
+                                navController.navigateUp()
+                            },
+                            onEditClick = { characterId ->
+                                navController.navigate(
+                                    EditCharacterDestination(
+                                        id = characterId
+                                    )
+                                )
+                            }
+                        )
+                    }
+
+                    composable<EditCharacterDestination> {
+                        CharacterFormStateScreen(
+                            onSaveSuccess = {
                                 navController.navigateUp()
                             }
                         )

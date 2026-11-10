@@ -21,6 +21,10 @@ data object CharactersDestination
 data class CharacterDetailsDestination(
     val id: Int
 )
+@Serializable
+data class EditCharacterDestination(
+    val id: Int = 0
+)
 
 @Serializable
 data object LocationsGraph

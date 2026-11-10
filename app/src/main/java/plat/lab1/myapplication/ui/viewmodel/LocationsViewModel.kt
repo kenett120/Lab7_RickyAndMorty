@@ -55,6 +55,15 @@ class LocationsViewModel(
         }
     }
 
+    fun toggleFavorite(location: Location) {
+        viewModelScope.launch {
+            repository.updateLocationFavorite(
+                id = location.id,
+                favorite = !location.isFavorite
+            )
+        }
+    }
+
     fun showError() {
         if (_uiState.value.isLoading) {
             loadingJob?.cancel()

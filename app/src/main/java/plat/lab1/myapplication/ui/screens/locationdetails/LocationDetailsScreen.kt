@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,8 +28,9 @@ import plat.lab1.myapplication.data.Location
 @Composable
 fun LocationDetailsScreen(
     location: Location,
-    modifier: Modifier = Modifier,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
@@ -40,10 +45,31 @@ fun LocationDetailsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Regresar"
                         )
                     }
-                }
+                },
+                actions = {
+                    IconButton(
+                        onClick = onFavoriteClick
+                    ) {
+                        Icon(
+                            imageVector = if (location.isFavorite) {
+                                Icons.Filled.Star
+                            } else {
+                                Icons.Outlined.StarBorder
+                            },
+                            contentDescription = "Favorito",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         }
     ) { paddingValues ->
@@ -74,6 +100,11 @@ fun LocationDetailsScreen(
             LocationDetailRow(
                 label = "Dimensions:",
                 value = location.dimension
+            )
+
+            LocationDetailRow(
+                label = "Favorito:",
+                value = if (location.isFavorite) "Sí" else "No"
             )
         }
     }

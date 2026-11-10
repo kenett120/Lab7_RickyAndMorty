@@ -72,4 +72,14 @@ class LocationDetailsViewModel(
             )
         }
     }
+    fun toggleFavorite() {
+        val location = _uiState.value.data ?: return
+
+        viewModelScope.launch {
+            repository.updateLocationFavorite(
+                id = location.id,
+                favorite = !location.isFavorite
+            )
+        }
+    }
 }

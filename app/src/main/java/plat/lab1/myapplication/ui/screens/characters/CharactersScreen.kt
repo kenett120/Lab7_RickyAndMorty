@@ -13,11 +13,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +47,7 @@ fun CharactersScreen(
     characters: List<Character>,
     onCharacterClick: (Int) -> Unit,
     onFavoriteClick: (Character) -> Unit,
+    onCreateClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var onlyFavorites by rememberSaveable {
@@ -67,6 +70,18 @@ fun CharactersScreen(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onCreateClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Crear personaje"
+                )
+            }
         }
     ) { innerPadding ->
 
@@ -92,7 +107,12 @@ fun CharactersScreen(
                 )
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp,
+                        bottom = 88.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(

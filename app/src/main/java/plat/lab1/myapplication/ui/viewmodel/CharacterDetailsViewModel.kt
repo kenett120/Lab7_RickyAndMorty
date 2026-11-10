@@ -83,4 +83,17 @@ class CharacterDetailsViewModel(
             )
         }
     }
+    fun deleteCharacter(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                repository.deleteCharacter(id)
+                onSuccess()
+            } catch (e: Exception) {
+                _uiState.value = ScreenState(
+                    isLoading = false,
+                    hasError = true
+                )
+            }
+        }
+    }
 }

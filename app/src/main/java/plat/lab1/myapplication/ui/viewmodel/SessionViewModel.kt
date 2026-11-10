@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import plat.lab1.myapplication.data.local.UserPreferences
 import plat.lab1.myapplication.data.room.RoomRepository
-
+import android.util.Log
 data class SessionState(
     val isLoading: Boolean = true,
     val isSyncing: Boolean = false,
@@ -58,6 +58,12 @@ class SessionViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                Log.e(
+                    "SYNC_ERROR",
+                    "Error durante la sincronización",
+                    e
+                )
+
                 _uiState.value = _uiState.value.copy(
                     hasError = true
                 )

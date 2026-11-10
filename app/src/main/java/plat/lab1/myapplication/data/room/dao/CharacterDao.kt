@@ -4,8 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import plat.lab1.myapplication.data.room.entity.CharacterEntity
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import plat.lab1.myapplication.data.room.entity.CharacterEntity
 
 @Dao
 interface CharacterDao {
@@ -22,11 +23,23 @@ interface CharacterDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(characters: List<CharacterEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCharacter(character: CharacterEntity)
+
+    @Update
+    suspend fun updateCharacter(character: CharacterEntity)
+
+    @Query("DELETE FROM characters WHERE id = :id")
+    suspend fun deleteCharacter(id: Int)
+
     @Query("UPDATE characters SET isFavorite = :isFavorite WHERE id = :id")
     suspend fun updateFavorite(id: Int, isFavorite: Boolean)
 
     @Query("SELECT COUNT(*) FROM characters")
     suspend fun countCharacters(): Int
+
+    @Query("SELECT MIN(id) FROM characters")
+    suspend fun getMinimumId(): Int?
 
     @Query("DELETE FROM characters")
     suspend fun deleteAll()
